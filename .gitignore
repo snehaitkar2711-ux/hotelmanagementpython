@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.py[cod]
+hotel_management.db
+hotel_management.db-journal
+hotel_management.db-shm
+hotel_management.db-wal

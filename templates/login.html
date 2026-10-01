@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Sign in · Bluehaven Hotel{% endblock %}
+{% block main_class %}auth-page{% endblock %}
+{% block content %}
+  <section class="auth-card">
+    <div class="auth-icon">✦</div>
+    <p class="eyebrow">WELCOME BACK</p>
+    <h1>Sign in to your hotel</h1>
+    <p class="muted">Use your account to continue to your workspace.</p>
+    <form method="post" class="form-stack">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <label for="username">Username</label>
+      <input id="username" name="username" autocomplete="username" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button class="button button-primary button-wide" type="submit">Sign in <span>→</span></button>
+    </form>
+    <p class="auth-footnote">Your team’s service hub, all in one place.</p>
+  </section>
+{% endblock %}

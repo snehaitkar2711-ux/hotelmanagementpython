@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Bluehaven Hotel{% endblock %}
+{% block content %}
+  <section class="welcome-row">
+    <div>
+      <p class="eyebrow">YOUR WORKSPACE</p>
+      <h1>{% if g.user.role == 'platformadmin' %}Platform dashboard{% elif g.user.role == 'manager' %}Manager dashboard{% else %}Waiter dashboard{% endif %}</h1>
+      <p class="muted">Good to see you, {{ g.user.username }}. Here’s what’s happening today.</p>
+    </div>
+    <div class="welcome-badge"><span class="online-dot"></span> Workspace active</div>
+  </section>
+
+  <section class="stats-grid" aria-label="Overview">
+    <article class="stat-card">
+      <span class="stat-icon icon-blue">♙</span>
+      <span class="stat-label">{% if g.user.role == 'platformadmin' %}Team accounts{% elif g.user.role == 'manager' %}Your waiters{% else %}Customers added{% endif %}</span>
+      <strong>{{ users|length if g.user.role != 'waiter' else customer_count }}</strong>
+      <span class="stat-caption">In your workspace</span>
+    </article>
+    <article class="stat-card">
+      <span class="stat-icon icon-sky">⌂</span>
+      <span class="stat-label">Customers</span>
+      <strong>{{ customer_count }}</strong>
+      <span class="stat-caption">{% if g.user.role == 'waiter' %}Added by you{% else %}Tracked by your team{% endif %}</span>
+    </article>
+    <article class="stat-card welcome-stat">
+      <span class="stat-label">A great stay starts here</span>
+      <strong class="stat-message">Care in every detail.</strong>
+      <span class="stat-caption">Keep your team and guest details close.</span>
+    </article>
+  </section>
+
+  {% if g.user.role in ['platformadmin', 'manager'] %}
+    <section class="content-grid">
+      <article class="panel">
+        <div class="panel-heading">
+          <div><p class="eyebrow">TEAM</p><h2>{% if g.user.role == 'platformadmin' %}Hotel accounts{% else %}Your waiters{% endif %}</h2></div>
+          <span class="count-pill">{{ users|length }} total</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Member</th><th>Role</th><th>Joined</th></tr></thead>
+            <tbody>
+              {% for member in users %}
+                <tr>
+                  <td><span class="avatar">{{ member.username[0]|upper }}</span><strong>{{ member.username }}</strong></td>
+                  <td><span class="role-tag">{{ member.role|replace('platformadmin', 'admin') }}</span></td>
+                  <td class="muted">{{ member.created_at[:10] }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="3" class="empty-state">No accounts here yet. Add your first teammate.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel form-panel">
+        <p class="eyebrow">GROW YOUR TEAM</p>
+        <h2>Add a {{ 'manager' if g.user.role == 'platformadmin' else 'waiter' }}</h2>
+        <p class="muted">Create a secure sign-in for your new team member.</p>
+        <form action="{{ url_for('add_user') }}" method="post" class="form-stack compact-form">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <label for="new-username">Username</label>
+          <input id="new-username" name="username" autocomplete="off" required>
+          <label for="new-password">Temporary password</label>
+          <input id="new-password" name="password" type="password" minlength="8" required>
+          <span class="field-hint">At least 8 characters.</span>
+          <button class="button button-primary" type="submit">Create account <span>→</span></button>
+        </form>
+      </article>
+    </section>
+    {% if g.user.role == 'platformadmin' %}
+      <section class="panel customer-panel">
+        <div class="panel-heading"><div><p class="eyebrow">GUEST OVERVIEW</p><h2>Recent customers</h2></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Customer</th><th>Phone</th><th>Added by</th><th>Added</th></tr></thead>
+            <tbody>
+              {% for customer in all_customers %}
+                <tr><td><strong>{{ customer.name }}</strong></td><td>{{ customer.phone }}</td><td>{{ customer.waiter_name }}</td><td class="muted">{{ customer.created_at[:10] }}</td></tr>
+              {% else %}
+                <tr><td colspan="4" class="empty-state">Customer records added by waiters will appear here.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% endif %}
+  {% else %}
+    <section class="content-grid waiter-grid">
+      <article class="panel form-panel">
+        <p class="eyebrow">GUEST BOOK</p>
+        <h2>Add a customer</h2>
+        <p class="muted">Save guest contact details securely in the hotel database.</p>
+        <form action="{{ url_for('add_customer_record') }}" method="post" class="form-stack compact-form">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <label for="customer-name">Full name</label>
+          <input id="customer-name" name="name" required>
+          <label for="customer-phone">Phone number</label>
+          <input id="customer-phone" name="phone" type="tel" required>
+          <label for="customer-email">Email <span class="optional">OPTIONAL</span></label>
+          <input id="customer-email" name="email" type="email">
+          <label for="customer-notes">Notes <span class="optional">OPTIONAL</span></label>
+          <textarea id="customer-notes" name="notes" rows="3"></textarea>
+          <button class="button button-primary" type="submit">Save customer <span>→</span></button>
+        </form>
+      </article>
+
+      <article class="panel">
+        <div class="panel-heading">
+          <div><p class="eyebrow">YOUR GUESTS</p><h2>Customers you added</h2></div>
+          <span class="count-pill">{{ customers|length }} total</span>
+        </div>
+        <div class="guest-list">
+          {% for customer in customers %}
+            <div class="guest-row">
+              <span class="avatar avatar-large">{{ customer.name[0]|upper }}</span>
+              <div class="guest-info"><strong>{{ customer.name }}</strong><span>{{ customer.phone }}{% if customer.email %} · {{ customer.email }}{% endif %}</span></div>
+              <time>{{ customer.created_at[:10] }}</time>
+            </div>
+          {% else %}
+            <div class="empty-state guest-empty">No customer records yet. Add your first guest using the form.</div>
+          {% endfor %}
+        </div>
+      </article>
+    </section>
+  {% endif %}
+{% endblock %}

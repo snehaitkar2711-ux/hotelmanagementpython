@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Set up your hotel · Bluehaven Hotel{% endblock %}
+{% block main_class %}auth-page{% endblock %}
+{% block content %}
+  <section class="auth-card">
+    <div class="auth-icon">✦</div>
+    <p class="eyebrow">LET’S GET STARTED</p>
+    <h1>Create your admin account</h1>
+    <p class="muted">This first account can add managers and set up your team.</p>
+    <form method="post" class="form-stack">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <label for="username">Admin username</label>
+      <input id="username" name="username" autocomplete="username" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+      <span class="field-hint">Use at least 8 characters.</span>
+      <button class="button button-primary button-wide" type="submit">Create admin account <span>→</span></button>
+    </form>
+  </section>
+{% endblock %}

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eaf5ff">
+  <title>{% block title %}Bluehaven Hotel{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('index') }}">
+      <span class="brand-mark">B</span>
+      <span>Bluehaven <small>HOTEL MANAGEMENT</small></span>
+    </a>
+    {% if g.user %}
+      <div class="account">
+        <span class="account-name">{{ g.user.username }} <span class="role-tag">{{ g.user.role|replace('platformadmin', 'admin') }}</span></span>
+        <form action="{{ url_for('logout') }}" method="post">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <button class="button button-quiet button-small" type="submit">Log out</button>
+        </form>
+      </div>
+    {% endif %}
+  </header>
+
+  <main class="{% block main_class %}page{% endblock %}">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="notices" role="status">
+          {% for category, message in messages %}
+            <div class="notice notice-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer">Bluehaven Hotel <span>·</span> Simple service, beautifully managed</footer>
+</body>
+</html>
